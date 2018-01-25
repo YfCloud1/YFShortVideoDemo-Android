@@ -2,6 +2,8 @@ package com.yfcloud.shortvideo.utils;
 
 import android.os.Environment;
 
+import com.yunfan.player.widget.YfPlayerKit;
+
 /**
  * Created by yunfan on 2017/7/25.
  */
@@ -57,6 +59,8 @@ public class Const {
      * 默认帧率
      */
     public static int DEFAULT_FRAMERATE = 24;
+
+    public static float VIDEO_WIDTH_HEIGHT_RADIO = 9f / 16f;
 
     /*****intent相关******/
     public static String KEY_PATH_AUDIO = "audio_path";

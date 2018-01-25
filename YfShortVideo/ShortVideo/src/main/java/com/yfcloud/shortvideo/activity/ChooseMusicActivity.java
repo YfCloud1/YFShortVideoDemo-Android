@@ -56,6 +56,16 @@ public class ChooseMusicActivity extends AppCompatActivity {
     }
 
     private void initView() {
+        TextView tvNext = (TextView) findViewById(R.id.tv_next);
+        tvNext.setText("原声录制");
+        tvNext.setVisibility(View.VISIBLE);
+        tvNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ChooseMusicActivity.this, VideoRecordActivity.class);
+                startActivity(intent);
+            }
+        });
         findViewById(R.id.tv_back).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

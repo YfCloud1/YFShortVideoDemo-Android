@@ -77,7 +77,7 @@ import okhttp3.Response;
  * 视频添加特效界面
  */
 public class VideoFilterActivity extends AppCompatActivity implements YfController.YfControl, View.OnClickListener {
-    private final String TAG = "Yf_VideoPlayActivity";
+    private final String TAG = "Yf_VideoFilterActivity";
     private YfGlSurfaceView mYfGlSurfaceView;
     private YfCloudPlayer mYfCloudPlayer;
     private String mCurrentPath, mFlashbackPath, mNormalPath;
@@ -144,8 +144,17 @@ public class VideoFilterActivity extends AppCompatActivity implements YfControll
         setContentView(R.layout.activity_video_play);
         mSurfaceLayout = (FrameLayout) findViewById(R.id.preview_layout);
         mRlSurface = (RelativeLayout) findViewById(R.id.rl_surface);
-        mYfGlSurfaceView = (YfGlSurfaceView) findViewById(R.id.yf_surface);
-
+//        mYfGlSurfaceView = (YfGlSurfaceView) findViewById(R.id.yf_surface);
+        mYfGlSurfaceView = new YfGlSurfaceView(this);
+        Log.d(TAG, "onCreate: " + Const.VIDEO_WIDTH_HEIGHT_RADIO);
+        if (Const.VIDEO_WIDTH_HEIGHT_RADIO > 1.7f) {
+            //almost = 16/9
+            int screenWidth = Util.getScreenWidth(this);
+            int height = (int) ((float) screenWidth / Const.VIDEO_WIDTH_HEIGHT_RADIO);
+            mRlSurface.addView(mYfGlSurfaceView, screenWidth, height);
+        } else {
+            mRlSurface.addView(mYfGlSurfaceView, RelativeLayout.LayoutParams.MATCH_PARENT);
+        }
         mLlBottom = (LinearLayout) findViewById(R.id.recorder_bottom);
         mStartBtn = (Button) findViewById(R.id.start_pause);
         mOutputBtn = (TextView) findViewById(R.id.publish);
@@ -1174,7 +1183,7 @@ public class VideoFilterActivity extends AppCompatActivity implements YfControll
                         if (activity.picCount == 0) {
                             Log.d(TAG, "load preview img：" + info.path);
                             Glide.with(VideoFilterActivity.this)
-                                    .load("file://" + info.path).centerCrop()
+                                    .load("file://" + info.path).fitCenter()
                                     .into(mCover);
                         }
                         mController.addThumbnail(info);

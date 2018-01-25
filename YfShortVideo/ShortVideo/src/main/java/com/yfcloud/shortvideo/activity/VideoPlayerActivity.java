@@ -73,7 +73,8 @@ public class VideoPlayerActivity extends AppCompatActivity {
                 return false;
             }
         });
-        mYfPlayerKit.setVideoLayout(YfPlayerKit.VIDEO_LAYOUT_FILL_PARENT);
+        mYfPlayerKit.setVideoLayout(Const.VIDEO_WIDTH_HEIGHT_RADIO > 1f ?
+                YfPlayerKit.VIDEO_LAYOUT_FIT_PARENT : YfPlayerKit.VIDEO_LAYOUT_FILL_PARENT);
         mYfPlayerKit.setAudioTrackStreamType(AudioManager.STREAM_MUSIC);
         mYfPlayerKit.setBufferSize(3 * 1024 * 1024);
         mYfPlayerKit.setVideoPath(mUrl);

@@ -6,6 +6,11 @@
     android:layout_height="match_parent"
     tools:context="com.yfcloud.shortvideo.activity.VideoCutActivity">
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_1"/>
+
     <com.yunfan.player.widget.YfPlayerKit
         android:id="@+id/yf_player_kit"
         android:layout_width="match_parent"

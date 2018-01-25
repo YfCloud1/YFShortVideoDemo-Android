@@ -56,7 +56,7 @@ import static com.yfcloud.shortvideo.utils.Const.MIN_RECORD_TIME;
 
 /**
  * 视频录制界面
- *
+ * <p>
  * ---YfEncoderKit相关--
  * 切换前后置
  * 手动/自动对焦
@@ -65,13 +65,12 @@ import static com.yfcloud.shortvideo.utils.Const.MIN_RECORD_TIME;
  * Faceu
  * 风格滤镜
  * 水印
- *
+ * <p>
  * ---YfCloudPLayer相关---
  * 倍速播放
- *
+ * <p>
  * ---YfVodKit相关---
  * 分段录制，回删
- *
  */
 public class VideoRecordActivity extends AppCompatActivity {
     private static final String TAG = "Yf_VideoRecordActivity";
@@ -106,6 +105,7 @@ public class VideoRecordActivity extends AppCompatActivity {
     private boolean mHevcEncoder = false;
     private int mBitrate;
     private int mFramerate;
+    private boolean mUseMusic;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +122,7 @@ public class VideoRecordActivity extends AppCompatActivity {
     private void getIntentData() {
         mAudioPath = getIntent().getStringExtra(Const.KEY_PATH_AUDIO);
         Log.d(TAG, "mAudioPath: " + mAudioPath);
+        mUseMusic = !TextUtils.isEmpty(mAudioPath);
         mBitrate = Configure.BITRATE;
         mFramerate = Configure.FRAME_RATE;
         int resolution = Configure.RESOLUTION;
@@ -174,6 +175,11 @@ public class VideoRecordActivity extends AppCompatActivity {
 
         //选取音乐时间
         ImageButton ibSelectStartTimeOk = (ImageButton) findViewById(R.id.ib_select_start_time_ok);
+
+        if (!mUseMusic) {
+            rgSpeed.setVisibility(View.GONE);
+            mIbMusicSeek.setVisibility(View.GONE);
+        }
 
         //特效
         mEffectBottom = findViewById(R.id.rl_effect_bottom);
@@ -325,7 +331,7 @@ public class VideoRecordActivity extends AppCompatActivity {
                     showToast("录制已达最大时长");
                     return;
                 }
-                if (!prepared) return;
+                if (!prepared && mUseMusic) return;
                 showView(mRlRecordButton);
                 mYfVodKit.startRecord(1 / mSpeed);
                 Log.d(TAG, "startRecord: ");
@@ -519,6 +525,7 @@ public class VideoRecordActivity extends AppCompatActivity {
 
     /**
      * faceu特效文件的路径。当使用assets目录下的特效文件时，可以仅使用特效名；如果需要使用其他路径下的特效文件，需输入包含目录的完整特效路径
+     *
      * @param itemName
      */
     private void changeFaceu(String itemName) {
@@ -618,7 +625,7 @@ public class VideoRecordActivity extends AppCompatActivity {
         mYfCloudPlayer.setDisplay(null);
         try {
             mYfCloudPlayer.setDataSource(mAudioPath);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         mYfCloudPlayer.prepareAsync();
@@ -682,16 +689,18 @@ public class VideoRecordActivity extends AppCompatActivity {
 
     /**
      * 初始化YfVodKit、YfEncoderKit
+     *
      * @param glSurfaceView
      */
     private void initRecord(GLSurfaceView glSurfaceView) {
         Log.d(TAG, "RECORD_BITRATE: " + Configure.RECORD_BITRATE);
         mYfVodKit = new YfVodKit(this, Const.PATH, PREVIEW_WIDTH, PREVIEW_HEIGHT,
-                VIDEO_WIDTH, VIDEO_HEIGHT, mHardEncoder, mFramerate, Configure.RECORD_BITRATE, mMonitor);
+                VIDEO_WIDTH, VIDEO_HEIGHT, true, mFramerate, mBitrate, mMonitor);
 
-        Log.d(TAG, "initRecord: " + mAudioPath);
-        mYfVodKit.setAudioSource(mAudioPath);
-        mYfVodKit.setInputPlayer(mPlayerInterface);
+        if (mUseMusic) {
+            mYfVodKit.setAudioSource(mAudioPath);
+            mYfVodKit.setInputPlayer(mPlayerInterface);
+        }
         mYfEncoderKit = mYfVodKit.getYfEncoderKit()//可以获取内部的YfEncoderKit以设置美颜等经典配置。
                 .enableFlipFrontCamera(false)//设置前置摄像头是否镜像处理，默认为false
                 .setContinuousFocus()//设置连续自动对焦

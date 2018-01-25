@@ -107,7 +107,6 @@ public class VideoCutActivity extends AppCompatActivity {
 
     private void initView() {
         mYfPlayerKit = (YfPlayerKit) findViewById(R.id.yf_player_kit);
-        mYfPlayerKit = (YfPlayerKit) findViewById(R.id.yf_player_kit);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_rv);
         mTvStartTime = (TextView) findViewById(R.id.tv_start_time);
         mTvEndTime = (TextView) findViewById(R.id.tv_end_time);
@@ -184,7 +183,9 @@ public class VideoCutActivity extends AppCompatActivity {
     }
 
     private void initPlayer() {
-        mYfPlayerKit.setVideoLayout(YfPlayerKit.VIDEO_LAYOUT_FILL_PARENT);
+        mYfPlayerKit.setHardwareDecoder(false);
+        mYfPlayerKit.setVideoLayout(Const.VIDEO_WIDTH_HEIGHT_RADIO > 1f ?
+                YfPlayerKit.VIDEO_LAYOUT_FIT_PARENT : YfPlayerKit.VIDEO_LAYOUT_FILL_PARENT);
         mYfPlayerKit.setVideoPath(mMuxVideoPath);
         mYfPlayerKit.setAudioTrackStreamType(AudioManager.STREAM_MUSIC);
         mYfPlayerKit.setOnPreparedListener(new YfCloudPlayer.OnPreparedListener() {

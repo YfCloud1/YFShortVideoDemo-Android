@@ -6,15 +6,17 @@
 
     <RelativeLayout
         android:id="@+id/rl_surface"
+        android:gravity="center"
+        android:background="@drawable/bg_1"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.yunfan.encoder.widget.YfGlSurfaceView
+       <!-- <com.yunfan.encoder.widget.YfGlSurfaceView
             android:id="@+id/yf_surface"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center"
-            />
+            />-->
     </RelativeLayout>
 
     <FrameLayout

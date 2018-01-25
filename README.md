@@ -26,13 +26,19 @@ Demo Project-SDK-Android-x.x.x
        │
        ├── libs
        │    │
+       │    ├── YfAuth.jar 				//鉴权
+       │    ├── nama.jar 				//faceu
+       │    ├── YfFilter.jar 			//特效滤镜
+       │    ├── YfAuth.jar 				//鉴权
        │    ├── YfEncoder.jar          // 推流 SDK Java依赖包
-	   │    ├── YfPlayerKit.jar          // 推流 SDK Java依赖包
+	   │    ├── YfPlayerKit.jar          //播放器 SDK Java依赖包
        │    │
        │    ├── armeabi-v7a            // armv7/armv7a 架构的动态链接库
        │    │    ├── libyfplayer.so
        │    │    ├── libyfsdl.so
        │    │    ├── libname.so
+       │    │    ├── libyf-filters.so
+       │    │    ├── libyfauth.so
        │    │    ├── libffmpeg.so
        │    │    ├── libmuxer.so
        │    │    └── libmuxer-m.so
@@ -40,8 +46,10 @@ Demo Project-SDK-Android-x.x.x
        │    └── arm64-v8a                         // arm64 架构的动态链接库
        │          ├── libyfplayer.so
        │          ├── libyfsdl.so
-       │    　    ├── libname.so
-       │    　    ├── libffmpeg.so
+       │          ├── libyf-filters.so
+       │          ├── libyfauth.so
+       │          ├── libname.so
+       │          ├── libffmpeg.so
        │          └── libmuxer.so
        │
        │
@@ -490,7 +498,7 @@ public void startEdit(Context context, String sourcePath, String outputPath)
 #### 4. 注意事项
 官网或github上下载的sdk仅支持使用测试域名进行推流/播放，正式使用请与我们联系获取正式token并设置推流域名。
 
-github地址：https://github.com/YfCloudKit/YfShortVideo-Android
+github地址：https://github.com/YfCloud1/YFShortVideoDemo-Android
 
 
 

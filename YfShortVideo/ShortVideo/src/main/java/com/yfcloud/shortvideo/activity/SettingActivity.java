@@ -5,11 +5,14 @@ import android.annotation.TargetApi;
 import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -30,9 +33,11 @@ import com.yfcloud.shortvideo.utils.Util;
 import com.yunfan.encoder.entity.YfVideo;
 import com.yunfan.encoder.widget.YfMediaKit;
 import com.yunfan.player.utils.Log;
+import com.yunfan.player.widget.YfPlayerKit;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.os.Build.VERSION_CODES.M;
@@ -91,20 +96,20 @@ public class SettingActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         if (requestCode == CODE_FOR_READ_WRITE) {
-            if (permissions[0].equals(Manifest.permission.CAMERA)
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                    && permissions[1].equals(Manifest.permission.RECORD_AUDIO)
-                    && grantResults[1] == PackageManager.PERMISSION_GRANTED
-                    && permissions[2].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                    && grantResults[2] == PackageManager.PERMISSION_GRANTED
-                    && permissions[3].equals(Manifest.permission.READ_EXTERNAL_STORAGE)
-                    && grantResults[3] == PackageManager.PERMISSION_GRANTED
-                    && permissions[4].equals(Manifest.permission.READ_PHONE_STATE)
-                    && grantResults[4] == PackageManager.PERMISSION_GRANTED) {
-                //用户同意使用camera
-                initView();
-            } else {
-                finish();
+                    if (permissions[0].equals(Manifest.permission.CAMERA)
+                            && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                            && permissions[1].equals(Manifest.permission.RECORD_AUDIO)
+                            && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                            && permissions[2].equals(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            && grantResults[2] == PackageManager.PERMISSION_GRANTED
+                            && permissions[3].equals(Manifest.permission.READ_EXTERNAL_STORAGE)
+                            && grantResults[3] == PackageManager.PERMISSION_GRANTED
+                            && permissions[4].equals(Manifest.permission.READ_PHONE_STATE)
+                            && grantResults[4] == PackageManager.PERMISSION_GRANTED) {
+                        //用户同意使用camera
+                        initView();
+                    } else {
+                        finish();
             }
         }
     }
@@ -130,6 +135,7 @@ public class SettingActivity extends AppCompatActivity {
         tvBack.setOnClickListener(mOnClickListener);
         tvStart.setOnClickListener(mOnClickListener);
         tvImport.setOnClickListener(mOnClickListener);
+//        getVideosInfo();
     }
 
     /**
@@ -227,6 +233,7 @@ public class SettingActivity extends AppCompatActivity {
                     break;
                 case R.id.btn_start_record:
                     configParams();
+                    Const.VIDEO_WIDTH_HEIGHT_RADIO = 9f / 16f;
                     Intent intent = new Intent(SettingActivity.this, ChooseMusicActivity.class);
                     startActivity(intent);
                     break;
@@ -292,7 +299,7 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        android.util.Log.d(TAG, "onActivityResult: " + requestCode + " " + resultCode);
+        android.util.Log.d(TAG, "onActivityResult: " + requestCode + " " + resultCode + data);
         if (requestCode == REQUEST_VIDEO_CODE && resultCode == RESULT_OK) {
 
             List<Uri> uris = new ArrayList<>();
@@ -310,8 +317,10 @@ public class SettingActivity extends AppCompatActivity {
             } else {
                 //单选导入
                 Uri uri = data.getData();
+                android.util.Log.d(TAG, "uri: " + uri.toString());
+
                 File file = FileUtils.getFile(SettingActivity.this, uri);
-                String videoPath = null;
+                String videoPath = "";
                 if (file != null && file.exists()) {
                     videoPath = file.getAbsolutePath();
                 }
@@ -380,10 +389,52 @@ public class SettingActivity extends AppCompatActivity {
     }
 
     private void gotoVideoCutActivity(String videoPath) {
+        checkVideoSize(videoPath);
         Intent intent = new Intent(SettingActivity.this, VideoCutActivity.class);
         intent.putExtra(Const.KEY_PATH_MUX_VIDEO, videoPath);
         startActivity(intent);
     }
+
+    private void checkVideoSize(String videoPath) {
+        Log.d(TAG, "videoPath: " + videoPath);
+
+        ContentResolver contentResolver = getContentResolver();
+        String[] videoColumns = new String[]{
+                MediaStore.Video.Media.DATA,
+                MediaStore.Video.Media.TITLE,
+                MediaStore.Video.Media.WIDTH,
+                MediaStore.Video.Media.HEIGHT
+        };
+        Cursor cursor = contentResolver.query
+                (MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoColumns,
+                        MediaStore.Video.Media.DATA + "=?", new String[]{videoPath}, null);
+        if (cursor != null) {
+            while (cursor.moveToNext()) {
+                String filePath =
+                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+                String title =
+                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE));
+                String width =
+                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.WIDTH));
+                String height =
+                        cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.HEIGHT));
+                Log.d(TAG, "title=" + title);
+                Log.d(TAG, "filePath=" + filePath);
+                Log.d(TAG, "width=" + width);
+                Log.d(TAG, "height=" + height);
+                try {
+                    float w = Float.valueOf(width);
+                    float h = Float.valueOf(height);
+                    Const.VIDEO_WIDTH_HEIGHT_RADIO = w / h;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Const.VIDEO_WIDTH_HEIGHT_RADIO = 9f / 16f;
+                }
+            }
+            cursor.close();
+        }
+    }
+
 
     @Override
     public void onBackPressed() {
