@@ -58,7 +58,7 @@ public class VideoCutActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         CacheActivity.addActivity(this);
-        YfPlayerKit.enableRotation(false);
+        YfPlayerKit.enableRotation(true);
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
