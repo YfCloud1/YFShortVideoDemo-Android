@@ -875,7 +875,7 @@ public class VideoRecordActivity extends AppCompatActivity {
             intent.putExtra(Const.KEY_OUTPUT_FRAMERATE, mFramerate);
             intent.putExtra(Const.KEY_OUTPUT_BITRATE, mBitrate);
             startActivity(intent);
-            finish();
+//            finish();
         }
     };
 

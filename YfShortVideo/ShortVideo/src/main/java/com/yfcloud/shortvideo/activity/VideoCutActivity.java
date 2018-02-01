@@ -3,22 +3,21 @@ package com.yfcloud.shortvideo.activity;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.media.AudioManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.SurfaceHolder;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
-import com.kuaipai.fangyan.core.shooting.jni.RecorderJni;
 import com.yfcloud.shortvideo.R;
 import com.yfcloud.shortvideo.adapter.VideoEditAdapter;
 import com.yfcloud.shortvideo.bean.VideoEditInfo;
@@ -35,12 +34,7 @@ import com.yunfan.player.widget.YfPlayerKit;
 import java.io.File;
 import java.lang.ref.WeakReference;
 
-import static android.R.attr.duration;
-import static android.R.attr.y;
-import static android.view.View.Y;
-import static com.yfcloud.shortvideo.R.id.seekBar;
 import static com.yfcloud.shortvideo.activity.VideoFilterActivity.SHOW_IMG_SUCCESS;
-import static com.yfcloud.shortvideo.activity.VideoFilterActivity.UPLOAD_PROGRESS;
 
 /**
  * 视频裁剪界面
@@ -64,14 +58,14 @@ public class VideoCutActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         CacheActivity.addActivity(this);
-        YfPlayerKit.enableRotation(true);
+        YfPlayerKit.enableRotation(false);
         super.onCreate(savedInstanceState);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_video_cut);
         getIntentData();
         initView();
-        initPlayer();
+        openVideo();
     }
 
     private void initMediaKit() {
@@ -101,12 +95,31 @@ public class VideoCutActivity extends AppCompatActivity {
         Intent intent = new Intent(VideoCutActivity.this, VideoFilterActivity.class);
         intent.putExtra(Const.KEY_PATH_MUX_VIDEO, path);
         startActivity(intent);
-        finish();
+//        finish();
     }
 
 
     private void initView() {
         mYfPlayerKit = (YfPlayerKit) findViewById(R.id.yf_player_kit);
+        mYfPlayerKit.setSurfaceCallBack(new SurfaceHolder.Callback() {
+            @Override
+            public void surfaceCreated(SurfaceHolder holder) {
+                Log.d(TAG, "surfaceCreated: ");
+//                openVideo();
+            }
+
+            @Override
+            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+                Log.d(TAG, "surfaceChanged: ");
+
+            }
+
+            @Override
+            public void surfaceDestroyed(SurfaceHolder holder) {
+                Log.d(TAG, "surfaceDestroyed: ");
+
+            }
+        });
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.id_rv);
         mTvStartTime = (TextView) findViewById(R.id.tv_start_time);
         mTvEndTime = (TextView) findViewById(R.id.tv_end_time);
@@ -182,7 +195,7 @@ public class VideoCutActivity extends AppCompatActivity {
         }
     }
 
-    private void initPlayer() {
+    private void openVideo() {
         mYfPlayerKit.setHardwareDecoder(false);
         mYfPlayerKit.setVideoLayout(Const.VIDEO_WIDTH_HEIGHT_RADIO > 1f ?
                 YfPlayerKit.VIDEO_LAYOUT_FIT_PARENT : YfPlayerKit.VIDEO_LAYOUT_FILL_PARENT);
@@ -195,7 +208,6 @@ public class VideoCutActivity extends AppCompatActivity {
                 mTvEndTime.setText((float) mDuration / 1000 + "");
                 endTime = mDuration;
                 Log.d(TAG, "onPrepared: " + mDuration);
-                mYfPlayerKit.start();
             }
         });
         mYfPlayerKit.setOnErrorListener(new YfCloudPlayer.OnErrorListener() {
@@ -214,6 +226,8 @@ public class VideoCutActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        mYfPlayerKit.start();
     }
 
     public void startPause() {
@@ -231,9 +245,9 @@ public class VideoCutActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mYfPlayerKit.resume();
         mUIHandler.post(updateProgressRunnable);
         initMediaKit();
+        mYfPlayerKit.resume();
     }
 
     private Runnable updateProgressRunnable = new Runnable() {
@@ -245,6 +259,7 @@ public class VideoCutActivity extends AppCompatActivity {
                         / (float) mDuration);
                 mUIHandler.postDelayed(this, 40);
             }
+
         }
     };
 
@@ -253,6 +268,11 @@ public class VideoCutActivity extends AppCompatActivity {
         super.onPause();
         mUIHandler.removeCallbacks(updateProgressRunnable);
         mYfPlayerKit.pause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
     }
 
     @Override
